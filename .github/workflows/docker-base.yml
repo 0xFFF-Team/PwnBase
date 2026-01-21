@@ -26,7 +26,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/pwnagent-base
+  IMAGE_NAME: ${{ toLower(github.repository_owner) }}/pwnagent-base
 
 jobs:
   setup:
