@@ -16,7 +16,7 @@ ubuntu_versions:
     use_break_system_packages: false
     codename: "jammy"
     is_lts: true
-    notes: "LTS, uses Java 21, Python 3.10"
+    notes: "LTS, uses Java 21, Python 3.10 (no --break-system-packages needed)"
 
   "24.04":
     java_package: "openjdk-21-jdk"

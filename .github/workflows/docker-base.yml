@@ -82,9 +82,13 @@ jobs:
         run: |
           VERSION="${{ matrix.ubuntu_version }}"
 
-          # Set Java package based on Ubuntu version
+          # Set Java package and break-system-packages flag based on Ubuntu version
+          # --break-system-packages is only available in Python 3.11+ (Ubuntu 24.04+)
           if [ "$VERSION" = "20.04" ]; then
             echo "java_package=openjdk-17-jdk" >> $GITHUB_OUTPUT
+            echo "use_break_system_packages=false" >> $GITHUB_OUTPUT
+          elif [ "$VERSION" = "22.04" ]; then
+            echo "java_package=openjdk-21-jdk" >> $GITHUB_OUTPUT
             echo "use_break_system_packages=false" >> $GITHUB_OUTPUT
           else
             echo "java_package=openjdk-21-jdk" >> $GITHUB_OUTPUT
