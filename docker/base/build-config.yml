@@ -2,21 +2,13 @@
 # This file documents the configuration differences between Ubuntu versions
 
 ubuntu_versions:
-  "18.04":
-    java_package: "openjdk-11-jdk"
-    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
-    use_break_system_packages: false
-    codename: "bionic"
-    is_lts: true
-    notes: "Oldest LTS, uses Java 11, Python 3.6"
-
   "20.04":
     java_package: "openjdk-17-jdk"
     java_home: "/usr/lib/jvm/java-17-openjdk-amd64"
     use_break_system_packages: false
     codename: "focal"
     is_lts: true
-    notes: "LTS, uses Java 17, Python 3.8"
+    notes: "LTS, uses Java 17, Python 3.9 (via deadsnakes PPA for pytest-json-ctrf)"
 
   "22.04":
     java_package: "openjdk-21-jdk"
@@ -61,7 +53,6 @@ ubuntu_versions:
 # Build matrix configuration for GitHub Actions
 build_matrix:
   ubuntu_versions:
-    - "18.04"
     - "20.04"
     - "22.04"
     - "24.04"
@@ -71,7 +62,6 @@ build_matrix:
 
   # LTS versions get additional "lts" tag
   lts_versions:
-    - "18.04"
     - "20.04"
     - "22.04"
     - "24.04"

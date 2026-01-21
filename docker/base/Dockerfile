@@ -1,6 +1,6 @@
 # PwnAgent Base Pwn Image
 # Version: 0.1.0
-# Supports: Ubuntu 18.04, 20.04, 22.04, 24.04, 24.10, 25.04, 25.10
+# Supports: Ubuntu 20.04, 22.04, 24.04, 24.10, 25.04, 25.10
 
 ARG UBUNTU_VERSION=24.04
 FROM ubuntu:${UBUNTU_VERSION}
@@ -9,6 +9,16 @@ FROM ubuntu:${UBUNTU_VERSION}
 ARG UBUNTU_VERSION
 ARG JAVA_PACKAGE=openjdk-21-jdk
 ARG USE_BREAK_SYSTEM_PACKAGES=true
+
+# Install Python 3.9 on Ubuntu 20.04 (required for pytest-json-ctrf)
+RUN if [ "${UBUNTU_VERSION}" = "20.04" ]; then \
+        apt-get update && \
+        apt-get install -y software-properties-common && \
+        add-apt-repository -y ppa:deadsnakes/ppa && \
+        apt-get update && \
+        apt-get install -y python3.9 python3.9-dev python3.9-venv && \
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1; \
+    fi
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -53,15 +63,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set JAVA_HOME based on installed Java version
-RUN if [ "${UBUNTU_VERSION}" = "18.04" ]; then \
-        echo "JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64" >> /etc/environment; \
-    elif [ "${UBUNTU_VERSION}" = "20.04" ]; then \
+RUN if [ "${UBUNTU_VERSION}" = "20.04" ]; then \
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> /etc/environment; \
     else \
         echo "JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" >> /etc/environment; \
     fi
 
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 # Install Python packages with version-aware flag handling
 RUN if [ "${USE_BREAK_SYSTEM_PACKAGES}" = "true" ]; then \

@@ -14,7 +14,6 @@ on:
         type: choice
         options:
           - all
-          - 18.04
           - 20.04
           - 22.04
           - 24.04
@@ -26,7 +25,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: pwnagent-base
+  IMAGE_NAME: ${{ github.repository_owner }}/pwnagent-base
 
 jobs:
   setup:
@@ -44,7 +43,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.ubuntu_version }}" != "all" ]; then
             echo 'matrix={"ubuntu_version":["${{ inputs.ubuntu_version }}"]}' >> $GITHUB_OUTPUT
           else
-            echo 'matrix={"ubuntu_version":["18.04","20.04","22.04","24.04","24.10","25.04","25.10"]}' >> $GITHUB_OUTPUT
+            echo 'matrix={"ubuntu_version":["20.04","22.04","24.04","24.10","25.04","25.10"]}' >> $GITHUB_OUTPUT
           fi
 
       - name: Check if build needed
@@ -84,10 +83,7 @@ jobs:
           VERSION="${{ matrix.ubuntu_version }}"
 
           # Set Java package based on Ubuntu version
-          if [ "$VERSION" = "18.04" ]; then
-            echo "java_package=openjdk-11-jdk" >> $GITHUB_OUTPUT
-            echo "use_break_system_packages=false" >> $GITHUB_OUTPUT
-          elif [ "$VERSION" = "20.04" ]; then
+          if [ "$VERSION" = "20.04" ]; then
             echo "java_package=openjdk-17-jdk" >> $GITHUB_OUTPUT
             echo "use_break_system_packages=false" >> $GITHUB_OUTPUT
           else
@@ -105,7 +101,11 @@ jobs:
       - name: Generate image tags
         id: tags
         run: |
-          BASE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          # Convert IMAGE_NAME to lowercase (Docker requires lowercase repository names)
+          IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+
+          # Use lowercase name for BASE_TAG
+          BASE_TAG="${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}"
           VERSION="${{ steps.version.outputs.version }}"
           UBUNTU_VER="${{ matrix.ubuntu_version }}"
           MAJOR_MINOR="${{ steps.version.outputs.major_minor }}"
@@ -119,7 +119,7 @@ jobs:
           fi
 
           # Add 'lts' tag for LTS versions
-          if [[ "$UBUNTU_VER" =~ ^(18.04|20.04|22.04|24.04)$ ]]; then
+          if [[ "$UBUNTU_VER" =~ ^(20.04|22.04|24.04)$ ]]; then
             TAGS="${TAGS},${BASE_TAG}:${VERSION}-lts,${BASE_TAG}:${MAJOR_MINOR}-lts"
             if [ "$UBUNTU_VER" = "24.04" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
               TAGS="${TAGS},${BASE_TAG}:lts"
@@ -170,8 +170,10 @@ jobs:
     steps:
       - name: Create summary
         run: |
+          # Convert IMAGE_NAME to lowercase for correct URL
+          IMAGE_NAME_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
           echo "## Multi-Version Build Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Built images for Ubuntu: 18.04, 20.04, 22.04, 24.04, 24.10, 25.04, 25.10" >> $GITHUB_STEP_SUMMARY
+          echo "Built images for Ubuntu: 20.04, 22.04, 24.04, 24.10, 25.04, 25.10" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Available at: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "Available at: ${{ env.REGISTRY }}/${IMAGE_NAME_LOWER}" >> $GITHUB_STEP_SUMMARY
