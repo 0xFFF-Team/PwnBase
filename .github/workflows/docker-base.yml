@@ -1,0 +1,177 @@
+name: Build PwnAgent Base Docker Images (Multi-Version)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docker/base/**'
+      - '.github/workflows/docker-base.yml'
+  workflow_dispatch:
+    inputs:
+      ubuntu_version:
+        description: 'Specific Ubuntu version to build (optional)'
+        required: false
+        type: choice
+        options:
+          - all
+          - 18.04
+          - 20.04
+          - 22.04
+          - 24.04
+          - 24.10
+          - 25.04
+          - 25.10
+  release:
+    types: [published]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/pwnagent-base
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      should_build: ${{ steps.check.outputs.should_build }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set build matrix
+        id: set-matrix
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.ubuntu_version }}" != "all" ]; then
+            echo 'matrix={"ubuntu_version":["${{ inputs.ubuntu_version }}"]}' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix={"ubuntu_version":["18.04","20.04","22.04","24.04","24.10","25.04","25.10"]}' >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if build needed
+        id: check
+        run: echo "should_build=true" >> $GITHUB_OUTPUT
+
+  build-and-push:
+    needs: setup
+    if: needs.setup.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+      fail-fast: false
+      max-parallel: 3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set version-specific build args
+        id: build-args
+        run: |
+          VERSION="${{ matrix.ubuntu_version }}"
+
+          # Set Java package based on Ubuntu version
+          if [ "$VERSION" = "18.04" ]; then
+            echo "java_package=openjdk-11-jdk" >> $GITHUB_OUTPUT
+            echo "use_break_system_packages=false" >> $GITHUB_OUTPUT
+          elif [ "$VERSION" = "20.04" ]; then
+            echo "java_package=openjdk-17-jdk" >> $GITHUB_OUTPUT
+            echo "use_break_system_packages=false" >> $GITHUB_OUTPUT
+          else
+            echo "java_package=openjdk-21-jdk" >> $GITHUB_OUTPUT
+            echo "use_break_system_packages=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract version from VERSION file
+        id: version
+        run: |
+          VERSION=$(cat docker/base/VERSION)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "major_minor=$(echo $VERSION | cut -d. -f1,2)" >> $GITHUB_OUTPUT
+
+      - name: Generate image tags
+        id: tags
+        run: |
+          BASE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          UBUNTU_VER="${{ matrix.ubuntu_version }}"
+          MAJOR_MINOR="${{ steps.version.outputs.major_minor }}"
+
+          # Generate tags
+          TAGS="${BASE_TAG}:${VERSION}-ubuntu${UBUNTU_VER},${BASE_TAG}:${MAJOR_MINOR}-ubuntu${UBUNTU_VER}"
+
+          # Add 'latest' tag for ubuntu24.04 on main branch
+          if [ "$UBUNTU_VER" = "24.04" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            TAGS="${TAGS},${BASE_TAG}:latest"
+          fi
+
+          # Add 'lts' tag for LTS versions
+          if [[ "$UBUNTU_VER" =~ ^(18.04|20.04|22.04|24.04)$ ]]; then
+            TAGS="${TAGS},${BASE_TAG}:${VERSION}-lts,${BASE_TAG}:${MAJOR_MINOR}-lts"
+            if [ "$UBUNTU_VER" = "24.04" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              TAGS="${TAGS},${BASE_TAG}:lts"
+            fi
+          fi
+
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/base
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            UBUNTU_VERSION=${{ matrix.ubuntu_version }}
+            JAVA_PACKAGE=${{ steps.build-args.outputs.java_package }}
+            USE_BREAK_SYSTEM_PACKAGES=${{ steps.build-args.outputs.use_break_system_packages }}
+          labels: |
+            maintainer=PwnAgent Team
+            description=Base image for pwn challenges - Ubuntu ${{ matrix.ubuntu_version }}
+            version=${{ steps.version.outputs.version }}
+            ubuntu.version=${{ matrix.ubuntu_version }}
+          cache-from: type=gha,scope=${{ matrix.ubuntu_version }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.ubuntu_version }}
+          provenance: true
+          sbom: true
+
+      - name: Generate build summary
+        run: |
+          echo "### Built Image for Ubuntu ${{ matrix.ubuntu_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.tags.outputs.tags }}" | tr ',' '\n' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Java Package:** ${{ steps.build-args.outputs.java_package }}" >> $GITHUB_STEP_SUMMARY
+
+  manifest:
+    needs: build-and-push
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Create summary
+        run: |
+          echo "## Multi-Version Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Built images for Ubuntu: 18.04, 20.04, 22.04, 24.04, 24.10, 25.04, 25.10" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Available at: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY

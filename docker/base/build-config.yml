@@ -1,0 +1,83 @@
+# Ubuntu version-specific build configurations
+# This file documents the configuration differences between Ubuntu versions
+
+ubuntu_versions:
+  "18.04":
+    java_package: "openjdk-11-jdk"
+    java_home: "/usr/lib/jvm/java-11-openjdk-amd64"
+    use_break_system_packages: false
+    codename: "bionic"
+    is_lts: true
+    notes: "Oldest LTS, uses Java 11, Python 3.6"
+
+  "20.04":
+    java_package: "openjdk-17-jdk"
+    java_home: "/usr/lib/jvm/java-17-openjdk-amd64"
+    use_break_system_packages: false
+    codename: "focal"
+    is_lts: true
+    notes: "LTS, uses Java 17, Python 3.8"
+
+  "22.04":
+    java_package: "openjdk-21-jdk"
+    java_home: "/usr/lib/jvm/java-21-openjdk-amd64"
+    use_break_system_packages: false
+    codename: "jammy"
+    is_lts: true
+    notes: "LTS, uses Java 21, Python 3.10"
+
+  "24.04":
+    java_package: "openjdk-21-jdk"
+    java_home: "/usr/lib/jvm/java-21-openjdk-amd64"
+    use_break_system_packages: true
+    codename: "noble"
+    is_lts: true
+    notes: "Latest LTS, uses Java 21, Python 3.12, requires --break-system-packages"
+
+  "24.10":
+    java_package: "openjdk-21-jdk"
+    java_home: "/usr/lib/jvm/java-21-openjdk-amd64"
+    use_break_system_packages: true
+    codename: "oracular"
+    is_lts: false
+    notes: "Interim release, EOL July 2025"
+
+  "25.04":
+    java_package: "openjdk-21-jdk"
+    java_home: "/usr/lib/jvm/java-21-openjdk-amd64"
+    use_break_system_packages: true
+    codename: "plucky"
+    is_lts: false
+    notes: "Interim release"
+
+  "25.10":
+    java_package: "openjdk-21-jdk"
+    java_home: "/usr/lib/jvm/java-21-openjdk-amd64"
+    use_break_system_packages: true
+    codename: "questing"
+    is_lts: false
+    notes: "Interim release"
+
+# Build matrix configuration for GitHub Actions
+build_matrix:
+  ubuntu_versions:
+    - "18.04"
+    - "20.04"
+    - "22.04"
+    - "24.04"
+    - "24.10"
+    - "25.04"
+    - "25.10"
+
+  # LTS versions get additional "lts" tag
+  lts_versions:
+    - "18.04"
+    - "20.04"
+    - "22.04"
+    - "24.04"
+
+  # Default version for 'latest' tag
+  default_version: "24.04"
+
+  # Default LTS version for 'lts' tag
+  default_lts_version: "24.04"
