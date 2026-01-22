@@ -53,30 +53,30 @@ docker run -it --rm ghcr.io/[owner]/pwnbase:latest
 
 ## Pre-installed Tools
 
+### Exploitation & Binary Analysis
+- **pwntools** - CTF framework and exploit development library
+- **ropper** - ROP gadget finder and exploit development assistant
+- **ROPgadget** - Alternative ROP gadget finder
+- **one_gadget** - One-gadget ROP resolver for libc
+
+### Debugging & Analysis
+- **pwndbg** - Enhanced GDB with pwn-specific features
+  - Automatic context display and memory visualization
+  - ROP/heap/stack analysis
+- **Ghidra 12.0.1** - NSA's reverse engineering suite
+  - Headless mode: `ghidra-headless <project> <script>`
+  - GUI mode: `ghidra`
+  - Location: `/opt/ghidra`
+- **PyGhidra** - Python API for Ghidra (pre-installed from bundled distribution)
+- **pytest** - Python testing framework for exploit validation
+- **pytest-json-ctrf** - JSON test reporting for CI/CD integration
+
 ### System Tools
 - **Build Tools**: `gcc`, `g++`, `make`, `cmake`, `nasm`
 - **Python**: `python3`, `pip`
 - **Debugging**: `gdb`, `gdbserver`, `ltrace`, `strace`
 - **Networking**: `curl`, `wget`, `netcat`, `socat`
 - **Utilities**: `git`, `vim`, `nano`, `file`, `openssl`
-
-### Exploitation Frameworks
-- **pwntools** - CTF framework and exploit development library
-- **ropper** - ROP gadget finder
-- **ROPgadget** - Alternative ROP gadget finder
-- **one_gadget** - One-gadget ROP resolver for libc
-
-### GDB Enhancement
-- **pwndbg** - Enhanced GDB with pwn-specific features
-  - Automatic context display
-  - Memory visualization
-  - ROP/heap/stack analysis
-
-### Reverse Engineering
-- **Ghidra 12.0.1** - NSA's reverse engineering framework
-  - Headless mode: `ghidra-headless <project> <script>`
-  - GUI mode: `ghidra`
-  - Location: `/opt/ghidra`
 
 ## Project Structure
 
@@ -133,7 +133,7 @@ Images are automatically built and published to GitHub Container Registry when:
 ### Manual Workflow Trigger
 
 1. Go to **Actions** tab in GitHub
-2. Select **"Build PwnAgent Base Docker Images (Multi-Version)"**
+2. Select **"Build PwnBase Docker Images (Multi-Version)"**
 3. Click **"Run workflow"**
 4. Select the desired Ubuntu version or build all
 

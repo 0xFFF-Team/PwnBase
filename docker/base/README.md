@@ -1,6 +1,6 @@
-# PwnAgent Base Pwn Image
+# PwnBase Docker Image
 
-Base Docker image for pwn challenges with common tools pre-installed.
+Docker base image for pwn/CTF challenges with pre-installed exploitation, reverse engineering, and debugging tools.
 
 ## Version: 0.1.0
 
@@ -80,32 +80,57 @@ docker build --build-arg UBUNTU_VERSION=20.04 \
 
 ## Pre-installed Tools
 
-### System Tools
-- `build-essential` (gcc, g++, make, cmake)
-- `python3`, `python3-pip`
-- `gdb`, `gdbserver`
-- `ltrace`, `strace`
-- `curl`, `wget`, `netcat-openbsd`, `socat`, `unzip`
-- `openssl`, `nasm`
-- `file`, `git`, `vim`, `nano`
-- `openjdk-21-jdk` (version varies by Ubuntu release)
+### Exploitation Frameworks
+- **pwntools** - CTF framework and exploit development library
+  - Use for: Binary exploitation, shellcode development, remote interaction
+  - Python API for process interaction, tube abstraction, packing/unpacking
 
-### Reverse Engineering Tools
-- `Ghidra` 12.0.1 - NSA's reverse engineering framework
+- **ropper** - Advanced ROP gadget finder
+  - Use for: Finding ROP gadgets in binaries, bypassing ASLR
+  - Supports multiple architectures and file formats
+
+- **ROPgadget** - ROP gadget finder
+  - Use for: Locating return-oriented programming gadgets
+  - Alternative to ropper with different search capabilities
+
+- **one_gadget** - One-gadget ROP resolver for libc
+  - Use for: Finding single-call ROP chains that spawn a shell
+  - Analyzes libc for execve("/bin/sh", ...) gadgets
+
+### Reverse Engineering
+- **Ghidra 12.0.1** - NSA's reverse engineering suite
+  - Use for: Deep binary analysis, decompilation, scriptable analysis
   - Headless mode: `ghidra-headless <project> <script>`
-  - GUI mode: `ghidra`
   - Location: `/opt/ghidra`
 
-### Python Tools
-- `pwntools` - CTF framework and exploit development library
-- `pytest` - Testing framework
-- `pytest-json-ctrf` - CTRF test reporting
-- `ropper` - ROP gadget finder
-- `ROPgadget` - ROP gadget finder
-- `one_gadget` - One gadget ROP resolver
+- **PyGhidra** - Python API for Ghidra (installed via bundled distribution)
+  - Use for: Automating Ghidra analysis, scripting in Python
+  - Pre-installed from Ghidra's bundled PyPI packages (offline mode)
+  - Import: `from ghidra.ghidra_bridge import *`
 
-### GDB Plugins
-- `pwndbg` - Enhanced GDB for pwn
+### Testing & Verification
+- **pytest** - Python testing framework
+  - Use for: Writing exploit tests, validating payloads, CI/CD integration
+  - Run with: `pytest` or `pytest <test_file>.py`
+
+- **pytest-json-ctrf** - CTRF test reporting for pytest
+  - Use for: JSON test results output, CI/CD integration
+  - Generates machine-readable test reports
+
+### Debugging Enhancement
+- **pwndbg** - Enhanced GDB for pwn
+  - Use for: Dynamic analysis, heap inspection, memory visualization
+  - Features: automatic context display, ROP/heap/stack analysis, syscall tracing
+  - Loads automatically in GDB
+
+### System Tools
+- **Build Tools**: `build-essential` (gcc, g++, make, cmake), `nasm`
+- **Python**: `python3`, `python3-pip`, `python3-dev`
+- **Debugging**: `gdb`, `gdbserver`, `ltrace`, `strace`
+- **Networking**: `curl`, `wget`, `netcat-openbsd`, `socat`
+- **Crypto**: `openssl`
+- **Utilities**: `file`, `git`, `vim`, `nano`, `unzip`
+- **Java**: `openjdk-21-jdk` (version varies by Ubuntu release)
 
 ## Version-Specific Notes
 
@@ -148,7 +173,7 @@ Images are automatically built and published via GitHub Actions when:
 
 To manually trigger a build for a specific version:
 1. Go to Actions tab in GitHub
-2. Select "Build PwnAgent Base Docker Images (Multi-Version)"
+2. Select "Build PwnBase Docker Images (Multi-Version)"
 3. Click "Run workflow"
 4. Select the desired Ubuntu version
 

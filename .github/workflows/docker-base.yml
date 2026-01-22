@@ -1,4 +1,4 @@
-name: Build PwnAgent Base Docker Images (Multi-Version)
+name: Build PwnBase Docker Images (Multi-Version)
 
 on:
   push:
@@ -141,8 +141,8 @@ jobs:
             JAVA_PACKAGE=${{ steps.build-args.outputs.java_package }}
             USE_BREAK_SYSTEM_PACKAGES=${{ steps.build-args.outputs.use_break_system_packages }}
           labels: |
-            maintainer=PwnAgent Team
-            description=Base image for pwn challenges - Ubuntu ${{ matrix.ubuntu_version }}
+            maintainer=PwnBase Team
+            description=PwnBase: Docker base image for pwn/CTF challenges - Ubuntu ${{ matrix.ubuntu_version }}
             version=${{ steps.version.outputs.version }}
             ubuntu.version=${{ matrix.ubuntu_version }}
           cache-from: type=gha,scope=${{ matrix.ubuntu_version }}

@@ -1,4 +1,4 @@
-# PwnAgent Base Pwn Image
+# PwnBase Docker Image
 # Version: 0.1.0
 # Supports: Ubuntu 20.04, 22.04, 24.04, 24.10, 25.04, 25.10
 
@@ -131,8 +131,8 @@ RUN echo "source /opt/pwndbg/gdbinit.py" > /root/.gdbinit
 WORKDIR /app
 
 # Labels for metadata
-LABEL maintainer="PwnAgent Team"
-LABEL description="Base image for pwn challenges with common tools"
+LABEL maintainer="PwnBase Team"
+LABEL description="PwnBase: Docker base image for pwn/CTF challenges with pre-installed exploitation, RE, and debugging tools"
 LABEL version="0.1.0"
 
 # Default command
