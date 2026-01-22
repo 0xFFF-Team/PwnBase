@@ -25,7 +25,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/pwnagent-base
+  IMAGE_NAME: ${{ github.repository_owner }}/pwnbase
 
 jobs:
   setup:
@@ -115,7 +115,7 @@ jobs:
           MAJOR_MINOR="${{ steps.version.outputs.major_minor }}"
 
           # Generate tags
-          TAGS="${BASE_TAG}:${VERSION}-ubuntu${UBUNTU_VER},${BASE_TAG}:${MAJOR_MINOR}-ubuntu${UBUNTU_VER}"
+          TAGS="${BASE_TAG}:${UBUNTU_VER}"
 
           # Add 'latest' tag for ubuntu24.04 on main branch
           if [ "$UBUNTU_VER" = "24.04" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
@@ -124,10 +124,7 @@ jobs:
 
           # Add 'lts' tag for LTS versions
           if [[ "$UBUNTU_VER" =~ ^(20.04|22.04|24.04)$ ]]; then
-            TAGS="${TAGS},${BASE_TAG}:${VERSION}-lts,${BASE_TAG}:${MAJOR_MINOR}-lts"
-            if [ "$UBUNTU_VER" = "24.04" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-              TAGS="${TAGS},${BASE_TAG}:lts"
-            fi
+            TAGS="${TAGS},${BASE_TAG}:lts"
           fi
 
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
