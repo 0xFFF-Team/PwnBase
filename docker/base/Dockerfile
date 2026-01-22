@@ -23,6 +23,7 @@ RUN if [ "${UBUNTU_VERSION}" = "20.04" ]; then \
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
+ENV PWNDBG_NO_AUTOUPDATE=1
 
 # Label with Ubuntu version
 LABEL ubuntu.version=${UBUNTU_VERSION}
@@ -104,6 +105,18 @@ RUN cd /tmp && \
     rm /tmp/ghidra_${GHIDRA_VERSION}_PUBLIC_*.zip && \
     ln -s ${GHIDRA_DIR}/support/analyzeHeadless /usr/local/bin/ghidra-headless && \
     ln -s ${GHIDRA_DIR}/ghidraRun /usr/local/bin/ghidra
+
+# Set GHIDRA_INSTALL_DIR for PyGhidra
+ENV GHIDRA_INSTALL_DIR=${GHIDRA_DIR}
+
+# Install PyGhidra from Ghidra's bundled distribution (offline mode)
+RUN if [ "${USE_BREAK_SYSTEM_PACKAGES}" = "true" ]; then \
+        python3 -m pip install --no-cache-dir --break-system-packages \
+            --no-index -f ${GHIDRA_DIR}/Ghidra/Features/PyGhidra/pypkg/dist pyghidra; \
+    else \
+        python3 -m pip install --no-cache-dir \
+            --no-index -f ${GHIDRA_DIR}/Ghidra/Features/PyGhidra/pypkg/dist pyghidra; \
+    fi
 
 # Create pwn user (common for pwn challenges)
 RUN useradd -m -s /bin/bash pwnuser
