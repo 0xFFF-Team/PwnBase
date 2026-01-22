@@ -10,13 +10,12 @@ PwnBase provides ready-to-use Docker images for binary exploitation and CTF chal
 
 | Version | Codename | Tag | Status |
 |---------|----------|-----|--------|
-| 18.04 | Bionic Beaver | `0.1.0-ubuntu18.04` | LTS |
-| 20.04 | Focal Fossa | `0.1.0-ubuntu20.04` | LTS |
-| 22.04 | Jammy Jellyfish | `0.1.0-ubuntu22.04` | LTS |
-| 24.04 | Noble Numbat | `0.1.0-ubuntu24.04`, `latest`, `lts` | LTS (Current) |
-| 24.10 | Oracular Oriole | `0.1.0-ubuntu24.10` | Interim |
-| 25.04 | Plucky Porpoise | `0.1.0-ubuntu25.04` | Interim |
-| 25.10 | Questing Quokka | `0.1.0-ubuntu25.10` | Interim |
+| 20.04 | Focal Fossa | `20.04`, `lts` | LTS |
+| 22.04 | Jammy Jellyfish | `22.04`, `lts` | LTS |
+| 24.04 | Noble Numbat | `24.04`, `latest`, `lts` | LTS (Current) |
+| 24.10 | Oracular Oriole | `24.10` | Interim |
+| 25.04 | Plucky Porpoise | `25.04` | Interim |
+| 25.10 | Questing Quokka | `25.10` | Interim |
 
 ## Quick Start
 
@@ -24,16 +23,16 @@ PwnBase provides ready-to-use Docker images for binary exploitation and CTF chal
 
 ```bash
 # Pull the latest LTS (Ubuntu 24.04)
-docker pull ghcr.io/[owner]/pwnagent-base:latest
+docker pull ghcr.io/[owner]/pwnbase:latest
 
 # Pull a specific Ubuntu version
-docker pull ghcr.io/[owner]/pwnagent-base:0.1.0-ubuntu22.04
+docker pull ghcr.io/[owner]/pwnbase:22.04
 ```
 
 ### Use in Your Dockerfile
 
 ```dockerfile
-FROM ghcr.io/[owner]/pwnagent-base:latest
+FROM ghcr.io/[owner]/pwnbase:latest
 
 # Add your challenge-specific setup
 COPY challenge /app/challenge
@@ -49,7 +48,7 @@ CMD ["/app/challenge"]
 ### Interactive Shell
 
 ```bash
-docker run -it --rm ghcr.io/[owner]/pwnagent-base:latest
+docker run -it --rm ghcr.io/[owner]/pwnbase:latest
 ```
 
 ## Pre-installed Tools
@@ -101,7 +100,7 @@ PwnBase/
 ### Build for Default Version (Ubuntu 24.04)
 
 ```bash
-docker build -t pwnagent/base:0.1.0-ubuntu24.04 docker/base
+docker build -t pwnbase:24.04 docker/base
 ```
 
 ### Build for Specific Ubuntu Version
@@ -112,15 +111,15 @@ docker build \
   --build-arg UBUNTU_VERSION=22.04 \
   --build-arg JAVA_PACKAGE=openjdk-21-jdk \
   --build-arg USE_BREAK_SYSTEM_PACKAGES=false \
-  -t pwnagent/base:0.1.0-ubuntu22.04 \
+  -t pwnbase:22.04 \
   -f docker/base/Dockerfile docker/base
 
-# Ubuntu 18.04 (older Java)
+# Ubuntu 20.04
 docker build \
-  --build-arg UBUNTU_VERSION=18.04 \
-  --build-arg JAVA_PACKAGE=openjdk-11-jdk \
+  --build-arg UBUNTU_VERSION=20.04 \
+  --build-arg JAVA_PACKAGE=openjdk-17-jdk \
   --build-arg USE_BREAK_SYSTEM_PACKAGES=false \
-  -t pwnagent/base:0.1.0-ubuntu18.04 \
+  -t pwnbase:20.04 \
   -f docker/base/Dockerfile docker/base
 ```
 
@@ -140,14 +139,9 @@ Images are automatically built and published to GitHub Container Registry when:
 
 ## Version-Specific Notes
 
-### Ubuntu 18.04 (Bionic)
-- OpenJDK 11 (Java 21 not available)
-- Python 3.6
-- Use for reproducing legacy challenges
-
 ### Ubuntu 20.04 (Focal)
 - OpenJDK 17
-- Python 3.8
+- Python 3.9
 - Good balance of compatibility and modern features
 
 ### Ubuntu 22.04 (Jammy)
@@ -168,13 +162,16 @@ Images are automatically built and published to GitHub Container Registry when:
 
 ### Pattern
 ```
-ghcr.io/[owner]/pwnagent-base:[VERSION]-ubuntu[UBUNTU_VERSION]
+ghcr.io/[owner]/pwnbase:[ubuntu_version]
 ```
 
 ### Examples
-- `ghcr.io/[owner]/pwnagent-base:0.1.0-ubuntu24.04` - Specific version
-- `ghcr.io/[owner]/pwnagent-base:latest` - Latest LTS (Ubuntu 24.04)
-- `ghcr.io/[owner]/pwnagent-base:lts` - Latest LTS (Ubuntu 24.04)
+- `ghcr.io/[owner]/pwnbase:24.04` - Ubuntu 24.04 (also `:latest`, `:lts`)
+- `ghcr.io/[owner]/pwnbase:22.04` - Ubuntu 22.04 (also `:lts`)
+- `ghcr.io/[owner]/pwnbase:20.04` - Ubuntu 20.04 (also `:lts`)
+- `ghcr.io/[owner]/pwnbase:24.10` - Ubuntu 24.10
+- `ghcr.io/[owner]/pwnbase:25.04` - Ubuntu 25.04
+- `ghcr.io/[owner]/pwnbase:25.10` - Ubuntu 25.10
 
 ## Contributing
 
